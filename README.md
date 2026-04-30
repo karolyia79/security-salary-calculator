@@ -1,37 +1,56 @@
-# Security Bérkalkulátor 2026 – Univerzális Bérügyi Keretrendszer
+# Security Bérkalkulátor 2026 – Technikai Architektúra és Rendszerleírás
 
-A **Security Bérkalkulátor 2026** egy moduláris felépítésű, professzionális bérszámfejtő és munkaidő-nyilvántartó szoftver[cite: 15]. Bár a projekt neve a biztonsági szektor igényeire utal, a rendszer valójában egy **univerzális motor**, amely bármely iparágban (kereskedelem, gyártás, szolgáltatás) alkalmazható a munkavállalók bérének és jelenlétének precíz kezelésére[cite: 15].
+A **Security Bérkalkulátor 2026** egy univerzális bérszámfejtő motor, amely a modularitást és a precíziós adatfeldolgozást helyezi előtérbe. A rendszer alkalmas korlátlan számú munkáltató (cég) és a hozzájuk tartozó munkavállalói állomány egyidejű, elkülönített kezelésére.
 
-## 🌟 Főbb Jellemzők
+## 🛠️ Technikai Stack és Modulok
 
-*   **Többcéges architektúra**: A rendszer képes több különböző munkáltató (cég) párhuzamos kezelésére, külön székhely- és adószám-nyilvántartással[cite: 12, 15].
-*   **Univerzális bérkezelés**: Automatikusan megkülönbözteti és kezeli az óradíjas és a havibéres dolgozókat[cite: 12].
-*   **Intelligens távolléti díj**: Havibéres dolgozók esetén is képes kiszámítani az egy órára jutó távolléti díjat az adott hónap munkanapjainak száma alapján[cite: 12].
-*   **Automatizált pótlékolás**: A beépített Gauss-algoritmus segítségével a rendszer felismeri a mozgóünnepeket (Húsvét, Pünkösd) és az éjszakai műszakokat, majd automatikusan kalkulálja a pótlékokat[cite: 12].
-*   **Dinamikus módosító tételek**: Kezeli a jutalmakat, bérelőlegeket és levonásokat, akár több hónapon átívelő, ciklikus futamidővel is[cite: 14].
-
-## 🛠️ Funkcionális Felépítés
-
-### 1. Jelenléti és Munkaidő-nyilvántartás
-A rendszer naptár alapú rögzítést használ, ahol a kezdési idő és az óraszám megadása után a szoftver automatikusan kiszámítja a műszak végét és a napszak szerinti bontást[cite: 12]. Megkülönbözteti a ledolgozott órákat, a szabadságot, a betegszabadságot és az ünnepi munkavégzést[cite: 12].
-
-### 2. Pénzügyi Modul és Hátralékkezelés
-A szoftver követi a kifizetett extrákat és a végrehajtott levonásokat[cite: 11, 14]. A ciklikus tételek rögzítésekor megadható egy záró dátum, ameddig a rendszer minden hónapban automatikusan érvényesíti az adott tételt[cite: 14].
-
-### 3. Transzparens Dokumentáció (Bérlap Függelék)
-Minden számfejtés végén egy részletes **PDF dokumentum** generálható, amely tartalmazza a havi mozgásokat és a munkavállaló aktuális tartozásait vagy hátralékait[cite: 11].
-
-## 🛡️ Biztonság és Jogosultság
-
-*   **Többszintű beléptetés**: Külön jogosultsági körök a Superuser (su), Keyuser (ku) és általános User felhasználók számára[cite: 15].
-*   **Adatvédelem**: A jelszavak SHA-256 titkosítással tárolódnak[cite: 15].
-*   **Eseménynapló**: Minden kritikus művelet (mentés, törlés, véglegesítés) visszakövethetően rögzítésre kerül a rendszerlogban[cite: 12].
-
-## 💻 Technikai Adatok
-
-*   **Adattárolás**: Helyi SQLite adatbázis (`berszamitas.db`)[cite: 12, 15].
-*   **Interfész**: Python/Tkinter alapú grafikus felület, intelligens vizuális visszajelzésekkel (pl. lüktető értesítő gomb)[cite: 15].
-*   **Azonosítás**: A beviteli fejlécben a biztonság érdekében mindig szerepel a kiválasztott dolgozó neve és születési dátuma[cite: 16].
+A szoftver Python alapú, az alábbi kulcsfontosságú könyvtárak felhasználásával:
+*   `sqlite3`: A teljes adatkezelés, tárolás és belső eseménynaplózás színhelye.
+*   `tkinter` & `ttk`: A dinamikus, skálázható felhasználói felületért felelős modulok.
+*   `fpdf`: A számfejtési adatokból generált, hiteles PDF dokumentumok motorja.
+*   `hashlib`: Az SHA-256 alapú biztonsági réteg a felhasználói hitelesítéshez.
+*   `datetime`, `calendar`, `math`: Az időalapú algoritmusok és a bértranszformációk matematikai háttere.
 
 ---
-*© 2026 Security Bérkalkulátor Projekt – Precizitás minden szektorban.*[cite: 15]
+
+## 🧮 Számítási Algoritmusok: A Rendszer Logikája
+
+A motor három fő területen végez komplex műveleteket:
+
+### 1. Bértranszformációs Motor (Óradíj/Havibér)
+A rendszer képessége az **automatikus távolléti díj kalkuláció**, amely havibéres dolgozóknál is tűpontos elszámolást tesz lehetővé.
+*   **Logika**: A szoftver az adott naptári hónap munkanapjainak száma alapján meghatározza az egy órára eső alapbért.
+*   **Alkalmazás**: Szabadság, betegszabadság vagy igazolt távollét esetén a rendszer ezzel a dinamikus értékkel korrigálja a havi fix összeget, biztosítva a jogszabályi megfelelést.
+
+### 2. Műszak-analitika és Pótlékolás
+A jelenléti ívek feldolgozása során a rendszer percalapú bontást végez:
+*   **Éjszakai analízis**: Automatikusan elkülöníti a 22:00 és 06:00 közötti idősávot, és erre számolja fel az éjszakai pótlékot.
+*   **Ünnepnap-algoritmus**: A beépített Gauss-húsvétalgoritmus segítségével a szoftver önműködően azonosítja a mozgóünnepeket (Húsvét, Pünkösd), így ezeken a napokon a megfelelő extra szorzókkal kalkulál.
+
+### 3. Pénzügyi Hátralék-kezelő (Ciklikus Modul)
+A levonások és extrák (pl. bérelőleg, jutalom) nem statikus tételek:
+*   A rendszer támogatja a **ciklikus futamidőt**, ahol egy tétel egy meghatározott záró dátumig minden hónapban automatikusan beemelésre kerül a bérbe.
+*   A hátralékok követése folyamatos, így a kifizetések és levonások egyenlege minden pillanatban naprakész.
+
+---
+
+## 🗄️ Adatbázis és Belső Logolás
+
+A szoftver minden adatot és eseményt a központi SQLite adatbázisban tárol. 
+
+### Adatbázis-séma jellemzői:
+*   **Munkáltatói izoláció**: A dolgozók és a számfejtési adatok cégazonosítóhoz kötöttek, így biztosított a multi-company működés.
+*   **Belső Eseménynapló**: A rendszer nem külső fájlba, hanem az adatbázis dedikált táblájába rögzít minden módosítást, mentést és véglegesítést, biztosítva az adatok integritását és visszakövethetőségét.
+*   **Azonosítási protokoll**: A beviteli felületeken a tévesztések elkerülése érdekében a rendszer a név mellett a születési dátumot használja elsődleges vizuális azonosítóként.
+
+---
+
+## 📄 Kimeneti Dokumentáció (Bérlap Függelék)
+
+A számítások végeredménye egy professzionális PDF dokumentum, amely túlmutat az egyszerű bérpapíron:
+*   Tételes kimutatást ad a havi mozgásokról (pótlékok, módosító tételek).
+*   Megjeleníti a ciklikus levonások aktuális státuszát és a még fennmaradó összegeket.
+*   Átlátható szerkezetet biztosít a munkavállaló és a könyvelés számára egyaránt.
+
+---
+*© 2026 Security Bérkalkulátor Projekt – Precizitás, Modularitás, Biztonság.*
